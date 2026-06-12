@@ -8,12 +8,15 @@ describe('問題データの整合性', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('各領域が出題数以上の問題を持つ(現状は各15問)', () => {
-    for (const id of domainIds) {
-      const count = questionPool.filter((q) => q.domain === id).length
+  it('各領域が出題数以上の問題を持ち、領域間で問数が揃っている', () => {
+    const counts = domainIds.map(
+      (id) => questionPool.filter((q) => q.domain === id).length,
+    )
+    for (const count of counts) {
       expect(count).toBeGreaterThanOrEqual(QUESTIONS_PER_DOMAIN)
-      expect(count).toBe(15)
     }
+    // 全領域が同じ問数(出題バランスの偏りを防ぐ)
+    expect(new Set(counts).size).toBe(1)
   })
 
   it('id のプレフィクスが領域と一致する', () => {
