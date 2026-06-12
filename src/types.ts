@@ -39,6 +39,16 @@ export interface AnswerRecord {
   score: number
 }
 
+/** 領域ごとの傾向コメント(内訳に応じて差し込む) */
+export interface DomainComment {
+  domain: Domain
+  /** その領域のスコア 0〜25 */
+  score: number
+  /** 0(溜め込み)〜4(徹底回避)の5段階レベル */
+  level: number
+  comment: string
+}
+
 export interface DiagnosisResult {
   /** 0〜100。そのままミニマリスト度% */
   total: number
@@ -47,4 +57,8 @@ export interface DiagnosisResult {
   /** 突出領域。偏りが閾値未満なら null */
   dominantDomain: Domain | null
   type: ResultType
+  /** 全体スコア帯ごとの一言(味付けコメント) */
+  scoreBandComment: string
+  /** 4領域それぞれの傾向コメント(domainIds 順) */
+  domainComments: DomainComment[]
 }

@@ -1,6 +1,17 @@
-import type { AnswerRecord, DiagnosisResult, Domain, ResultType } from '../types'
+import type {
+  AnswerRecord,
+  DiagnosisResult,
+  DomainComment,
+  Domain,
+  ResultType,
+} from '../types'
 import { domainIds } from '../data/domains'
 import { resultTypeById } from '../data/resultTypes'
+import {
+  domainComments,
+  domainLevel,
+  scoreBandComment,
+} from '../data/insights'
 
 /** 突出領域とみなす偏り(他3領域平均との差)の閾値 */
 export const DOMINANT_THRESHOLD = 5
@@ -75,11 +86,29 @@ export function judgeType(
   return resultTypeById('collector')
 }
 
+/** 領域スコアから、各領域の傾向コメントを組み立てる(domainIds 順) */
+export function buildDomainComments(
+  domainScores: Record<Domain, number>,
+): DomainComment[] {
+  return domainIds.map((domain) => {
+    const score = domainScores[domain]
+    const level = domainLevel(score)
+    return { domain, score, level, comment: domainComments[domain][level] }
+  })
+}
+
 /** 回答一式から診断結果を組み立てる */
 export function diagnose(answers: AnswerRecord[]): DiagnosisResult {
   const domainScores = aggregateDomainScores(answers)
   const total = answers.reduce((sum, a) => sum + a.score, 0)
   const dominantDomain = findDominantDomain(domainScores)
   const type = judgeType(total, dominantDomain)
-  return { total, domainScores, dominantDomain, type }
+  return {
+    total,
+    domainScores,
+    dominantDomain,
+    type,
+    scoreBandComment: scoreBandComment(total),
+    domainComments: buildDomainComments(domainScores),
+  }
 }

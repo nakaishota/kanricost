@@ -6,6 +6,7 @@ import {
   judgeType,
   DOMINANT_THRESHOLD,
 } from '../scoring'
+import { domainLevel, scoreBandComment } from '../../data/insights'
 import { domainIds, TOTAL_QUESTIONS } from '../../data/domains'
 import type { AnswerRecord, Domain } from '../../types'
 
@@ -121,6 +122,75 @@ describe('findDominantDomain', () => {
     // mono と digital が同点で最大
     const r = findDominantDomain({ mono: 20, digital: 20, people: 0, money: 0 })
     expect(r).toBe('mono')
+  })
+})
+
+describe('domainLevel — 領域スコアの5段階化(境界値)', () => {
+  it.each([
+    [0, 0],
+    [5, 0],
+    [6, 1],
+    [11, 1],
+    [12, 2],
+    [16, 2],
+    [17, 3],
+    [21, 3],
+    [22, 4],
+    [25, 4],
+  ])('score %i → level %i', (score, level) => {
+    expect(domainLevel(score)).toBe(level)
+  })
+})
+
+describe('scoreBandComment — 全スコアで必ず一言を返す', () => {
+  it('0〜100 すべてで空でないコメントを返す', () => {
+    for (let s = 0; s <= 100; s++) {
+      expect(scoreBandComment(s).length).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe('diagnose — 細かい傾向コメント(方向A/C)', () => {
+  it('4領域すべての傾向コメントを domainIds 順で返す', () => {
+    const r = diagnose(uniformAnswers(3))
+    expect(r.domainComments).toHaveLength(4)
+    expect(r.domainComments.map((c) => c.domain)).toEqual(domainIds)
+    for (const c of r.domainComments) {
+      expect(c.comment.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('全0点は各領域レベル0、全5点は各領域レベル4', () => {
+    const low = diagnose(uniformAnswers(0))
+    for (const c of low.domainComments) expect(c.level).toBe(0)
+    const high = diagnose(uniformAnswers(5))
+    for (const c of high.domainComments) expect(c.level).toBe(4)
+  })
+
+  it('領域ごとに内訳が違えばコメントも違う(個別フィードバック)', () => {
+    const r = diagnose(
+      answersOf({
+        mono: [5, 5, 5, 5, 5], // 25 → level4
+        digital: [0, 0, 0, 0, 0], // 0 → level0
+        people: [3, 3, 3, 1, 1], // 11 → level1
+        money: [3, 3, 3, 3, 3], // 15 → level2
+      }),
+    )
+    const byDomain = Object.fromEntries(
+      r.domainComments.map((c) => [c.domain, c.level]),
+    )
+    expect(byDomain.mono).toBe(4)
+    expect(byDomain.digital).toBe(0)
+    expect(byDomain.people).toBe(1)
+    expect(byDomain.money).toBe(2)
+  })
+
+  it('スコア帯ごとの一言が返る(全0点と全5点で異なる)', () => {
+    const low = diagnose(uniformAnswers(0)).scoreBandComment
+    const high = diagnose(uniformAnswers(5)).scoreBandComment
+    expect(low.length).toBeGreaterThan(0)
+    expect(high.length).toBeGreaterThan(0)
+    expect(low).not.toBe(high)
   })
 })
 
