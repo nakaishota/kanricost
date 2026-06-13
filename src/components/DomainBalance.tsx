@@ -24,14 +24,23 @@ export function DomainBalance({ result }: { result: DiagnosisResult }) {
       >
         Balance / 領域別
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {domains.map((d, i) => {
           const score = result.domainScores[d.id]
           const isMax = result.maxDomain === d.id
           const w = `${((score / MAX_DOMAIN_SCORE) * 100).toFixed(0)}%`
           const barColor = isMax ? 'var(--ink)' : 'var(--bar-off)'
           return (
-            <div key={d.id}>
+            <div
+              key={d.id}
+              style={{
+                border: `1px solid ${isMax ? 'var(--faint)' : 'var(--line)'}`,
+                borderRadius: 12,
+                background: 'var(--white)',
+                padding: '16px 18px',
+                boxShadow: '0 1px 1px #00000008, 0 2px 4px #0000000a',
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
