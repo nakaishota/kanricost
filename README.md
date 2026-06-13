@@ -2,27 +2,12 @@
 
 「管理コスト(物事を維持・管理する手間)をどれだけ嫌うか」を日常のシナリオから診断し、ミニマリスト度を占うエンタメ系Web診断サイト。
 
+**公開サイト → https://nakaishota.github.io/kanricost/**
+
 - **静的SPAで完結**(サーバー・DB・実行時AI不要)
 - モノ / デジタル / 人間関係・予定 / お金・契約 の4領域、100問プールから毎回20問をランダム抽選
 - 結果は8タイプ分類 + ミニマリスト度% + 領域別内訳 + 細分化された傾向コメント
-
-## 開発
-
-```bash
-npm install
-npm run dev      # 開発サーバー(http://localhost:5173)
-npm run test     # ロジックのユニットテスト(Vitest)
-npm run build    # 本番ビルド → dist/
-npm run preview  # 本番ビルドのローカル確認
-```
-
-## デプロイ
-
-ビルド成果物 `dist/` を静的ホスティングに置くだけで動きます。SPA だがURLルーティングを使わないため、リライト設定は不要です。
-
-- **Vercel / Cloudflare Pages**(推奨): GitHub 連携で push するだけで自動ビルド&公開。フレームワークは Vite 自動認識、ビルドコマンド `npm run build`、出力ディレクトリ `dist`。
-- **GitHub Pages**: サブパス配信になる場合は `vite.config.ts` に `base: '/<リポジトリ名>/'` を追加。
-- **レンタルサーバー(エックスサーバー等)**: `dist/` の中身を FTP でアップロード。
+- Vite + React + TypeScript で構築、診断ロジックは Vitest でテスト
 
 ## 構成
 
