@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   aggregateDomainScores,
   diagnose,
-  findDominantDomain,
+  findMaxDomain,
   judgeType,
-  DOMINANT_THRESHOLD,
+  scoreSpread,
+  SPREAD_THRESHOLD,
 } from '../scoring'
 import { domainLevel, scoreBandComment } from '../../data/insights'
 import { domainIds, TOTAL_QUESTIONS } from '../../data/domains'
@@ -36,11 +37,11 @@ describe('aggregateDomainScores', () => {
   it('領域ごとに合計する', () => {
     const scores = aggregateDomainScores([
       { questionId: 'mono-1', domain: 'mono', score: 5 },
-      { questionId: 'mono-2', domain: 'mono', score: 3 },
-      { questionId: 'money-1', domain: 'money', score: 1 },
+      { questionId: 'mono-2', domain: 'mono', score: 4 },
+      { questionId: 'money-1', domain: 'money', score: 2 },
     ])
-    expect(scores.mono).toBe(8)
-    expect(scores.money).toBe(1)
+    expect(scores.mono).toBe(9)
+    expect(scores.money).toBe(2)
     expect(scores.digital).toBe(0)
   })
 })
@@ -59,69 +60,60 @@ describe('judgeType — 全体スコア帯', () => {
     expect(r.type.id).toBe('gachi-minimalist')
   })
 
-  it('境界 29/30: collector → hodohodo', () => {
-    expect(judgeType(29, null).id).toBe('collector')
-    expect(judgeType(30, null).id).toBe('hodohodo')
+  it('境界 39/40: collector → 中スコア帯', () => {
+    expect(judgeType(39, 'mono', 0).id).toBe('collector')
+    expect(judgeType(40, 'mono', 0).id).toBe('hodohodo')
   })
 
-  it('境界 54/55: hodohodo → 中位帯(突出なしで隠れ管理嫌い)', () => {
-    expect(judgeType(54, null).id).toBe('hodohodo')
-    expect(judgeType(55, null).id).toBe('kakure-kanri-girai')
+  it('境界 64/65: 中スコア帯 → 領域別タイプ', () => {
+    expect(judgeType(64, 'mono', 0).id).toBe('hodohodo')
+    expect(judgeType(65, 'mono', 0).id).toBe('tebura')
   })
 
-  it('境界 79/80: 中位帯 → ガチミニマリスト', () => {
-    expect(judgeType(79, null).id).toBe('kakure-kanri-girai')
-    expect(judgeType(80, null).id).toBe('gachi-minimalist')
+  it('境界 84/85: 領域別 → ガチミニマリスト', () => {
+    expect(judgeType(84, 'mono', 0).id).toBe('tebura')
+    expect(judgeType(85, 'mono', 0).id).toBe('gachi-minimalist')
   })
 
-  it('80点以上は突出があってもガチミニマリスト固定', () => {
-    expect(judgeType(90, 'mono').id).toBe('gachi-minimalist')
+  it('85点以上は偏りがあってもガチミニマリスト固定', () => {
+    expect(judgeType(90, 'mono', 20).id).toBe('gachi-minimalist')
   })
 })
 
-describe('judgeType — 中位帯の領域別タイプ', () => {
+describe('judgeType — 中スコア帯の偏りによる分岐', () => {
+  it('40〜64 × 偏り大(spread>=9)→ 隠れ管理嫌い型', () => {
+    expect(judgeType(50, 'mono', SPREAD_THRESHOLD).id).toBe('kakure-kanri-girai')
+  })
+
+  it('40〜64 × 偏り小(spread<9)→ ほどほど管理型', () => {
+    expect(judgeType(50, 'mono', SPREAD_THRESHOLD - 1).id).toBe('hodohodo')
+  })
+})
+
+describe('judgeType — 65〜84帯の領域別タイプ', () => {
   const cases: Array<[Domain, string]> = [
     ['mono', 'tebura'],
     ['digital', 'tsuchi-zero'],
     ['people', 'yotei-hakushi'],
     ['money', 'koteihi-allergy'],
   ]
-  it.each(cases)('55〜79 × 突出 %s → %s', (domain, typeId) => {
-    expect(judgeType(60, domain).id).toBe(typeId)
+  it.each(cases)('最大領域 %s → %s', (domain, typeId) => {
+    expect(judgeType(70, domain, 10).id).toBe(typeId)
   })
 })
 
-describe('findDominantDomain', () => {
-  it('偏りが閾値以上なら突出領域を返す', () => {
-    // mono=20, 他=5 → deviation = 20 - 5 = 15 >= 5
-    const r = findDominantDomain({ mono: 20, digital: 5, people: 5, money: 5 })
-    expect(r).toBe('mono')
+describe('findMaxDomain / scoreSpread', () => {
+  it('最大スコアの領域を返す', () => {
+    expect(findMaxDomain({ mono: 20, digital: 5, people: 5, money: 5 })).toBe('mono')
   })
 
-  it('偏りが閾値ちょうどなら突出とみなす', () => {
-    // deviation = DOMINANT_THRESHOLD ちょうどになるよう構成
-    // mono=x, 他3つ=y, x - y = 5
-    const r = findDominantDomain({ mono: 13, digital: 8, people: 8, money: 8 })
-    // deviation = 13 - 8 = 5
-    expect(DOMINANT_THRESHOLD).toBe(5)
-    expect(r).toBe('mono')
+  it('同点は domainIds の定義順で先勝ち(決定的)', () => {
+    expect(findMaxDomain({ mono: 20, digital: 20, people: 0, money: 0 })).toBe('mono')
   })
 
-  it('偏りが閾値未満なら null', () => {
-    // mono=12, 他=8 → deviation = 4 < 5
-    const r = findDominantDomain({ mono: 12, digital: 8, people: 8, money: 8 })
-    expect(r).toBeNull()
-  })
-
-  it('完全に均等なら null', () => {
-    const r = findDominantDomain({ mono: 10, digital: 10, people: 10, money: 10 })
-    expect(r).toBeNull()
-  })
-
-  it('同点の突出は domainIds の定義順で先勝ち(決定的)', () => {
-    // mono と digital が同点で最大
-    const r = findDominantDomain({ mono: 20, digital: 20, people: 0, money: 0 })
-    expect(r).toBe('mono')
+  it('偏り(最大-最小)を返す', () => {
+    expect(scoreSpread({ mono: 20, digital: 5, people: 8, money: 12 })).toBe(15)
+    expect(scoreSpread({ mono: 10, digital: 10, people: 10, money: 10 })).toBe(0)
   })
 })
 
@@ -152,7 +144,7 @@ describe('scoreBandComment — 全スコアで必ず一言を返す', () => {
 
 describe('diagnose — 細かい傾向コメント(方向A/C)', () => {
   it('4領域すべての傾向コメントを domainIds 順で返す', () => {
-    const r = diagnose(uniformAnswers(3))
+    const r = diagnose(uniformAnswers(4))
     expect(r.domainComments).toHaveLength(4)
     expect(r.domainComments.map((c) => c.domain)).toEqual(domainIds)
     for (const c of r.domainComments) {
@@ -172,8 +164,8 @@ describe('diagnose — 細かい傾向コメント(方向A/C)', () => {
       answersOf({
         mono: [5, 5, 5, 5, 5], // 25 → level4
         digital: [0, 0, 0, 0, 0], // 0 → level0
-        people: [3, 3, 3, 1, 1], // 11 → level1
-        money: [3, 3, 3, 3, 3], // 15 → level2
+        people: [4, 2, 2, 2, 0], // 10 → level1
+        money: [4, 4, 4, 2, 0], // 14 → level2
       }),
     )
     const byDomain = Object.fromEntries(
@@ -195,32 +187,31 @@ describe('diagnose — 細かい傾向コメント(方向A/C)', () => {
 })
 
 describe('diagnose — 統合', () => {
-  it('特定領域に偏った中位スコアで領域別タイプになる', () => {
-    // money に集中して高得点、他は低め。total は 55〜79 帯。
+  it('money に偏った高スコアで固定費アレルギー型・maxDomain=money', () => {
     const r = diagnose(
       answersOf({
-        mono: [1, 1, 1, 1, 1], // 5
-        digital: [1, 1, 1, 1, 1], // 5
-        people: [1, 1, 1, 1, 1], // 5
+        mono: [4, 4, 2, 2, 2], // 14
+        digital: [4, 4, 2, 2, 2], // 14
+        people: [4, 2, 2, 2, 2], // 12
         money: [5, 5, 5, 5, 5], // 25
       }),
     )
-    expect(r.total).toBe(40) // ← hodohodo 帯
-    expect(r.type.id).toBe('hodohodo')
-    expect(r.dominantDomain).toBe('money')
+    expect(r.total).toBe(65) // 65〜84 帯
+    expect(r.maxDomain).toBe('money')
+    expect(r.type.id).toBe('koteihi-allergy')
   })
 
-  it('中位帯かつ money 突出 → 固定費アレルギー型', () => {
+  it('中スコア帯で偏りが大きいと隠れ管理嫌い型', () => {
     const r = diagnose(
       answersOf({
-        mono: [3, 3, 3, 3, 1], // 13
-        digital: [3, 3, 3, 1, 1], // 11
-        people: [3, 3, 1, 1, 1], // 9
-        money: [5, 5, 5, 5, 5], // 25
+        mono: [5, 5, 5, 4, 2], // 21
+        digital: [2, 2, 0, 0, 0], // 4
+        people: [4, 4, 2, 2, 0], // 12
+        money: [4, 2, 2, 2, 0], // 10
       }),
     )
-    expect(r.total).toBe(58) // 55〜79 帯
-    expect(r.dominantDomain).toBe('money')
-    expect(r.type.id).toBe('koteihi-allergy')
+    expect(r.total).toBe(47) // 40〜64 帯
+    expect(r.spread).toBeGreaterThanOrEqual(SPREAD_THRESHOLD)
+    expect(r.type.id).toBe('kakure-kanri-girai')
   })
 })

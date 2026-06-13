@@ -1,3 +1,104 @@
 :root {
-  font-family: sans-serif;
+  --bg: #fafafa;
+  --ink: #171717;
+  --black: #000000;
+  --sub: #4d4d4d;
+  --muted: #888888;
+  --faint: #a1a1a1;
+  --line: #ebebeb;
+  --bar-track: #ebebeb;
+  --bar-off: #d4d4d4;
+  --white: #ffffff;
+  --card-shadow: 0 1px 1px #00000012, 0 10px 28px -10px #00000033;
+
+  /* スタート/結果の背景グラデーションに使う領域カラー */
+  --grad-blue: rgba(59, 130, 246, 0.38);
+  --grad-teal: rgba(45, 212, 191, 0.34);
+  --grad-indigo: rgba(99, 102, 241, 0.3);
+  --grad-amber: rgba(245, 158, 11, 0.26);
+
+  font-family: 'SF Pro JP', 'SF Pro Display', 'SF Pro Icons',
+    'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', メイリオ, Meiryo,
+    'ＭＳ Ｐゴシック', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+}
+
+.app-frame {
+  width: 100%;
+  max-width: 448px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 数字は等幅で揃える */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes kc-breathe {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes kc-curtain {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes kc-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kc-bar {
+  from {
+    width: 0;
+  }
+}
+@keyframes kc-gauge {
+  from {
+    stroke-dashoffset: 584.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

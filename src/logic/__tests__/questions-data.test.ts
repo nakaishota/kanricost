@@ -31,8 +31,8 @@ describe('問題データの整合性', () => {
     }
   })
 
-  it('すべての選択肢のスコアが {0,1,3,5} のいずれか', () => {
-    const allowed = new Set([0, 1, 3, 5])
+  it('すべての選択肢のスコアが {0,2,4,5} のいずれか', () => {
+    const allowed = new Set([0, 2, 4, 5])
     for (const q of questionPool) {
       for (const c of q.choices) {
         expect(allowed.has(c.score)).toBe(true)

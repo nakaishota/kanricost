@@ -4,12 +4,16 @@ export interface DomainInfo {
   id: Domain
   name: string
   emoji: string
+  /** 結果画面などで使う英字コード(PHYSICAL / DIGITAL / SOCIAL / FINANCE) */
+  code: string
+  /** SVGアイコンの内側パス(stroke 描画) */
+  icon: string
 }
 
 export interface Choice {
   text: string
-  /** 管理コスト回避度。5 = 最も回避(手放す・持たない) */
-  score: 0 | 1 | 3 | 5
+  /** 管理コスト回避度。5 = 最も回避(手放す・持たない)、0 = 最も溜め込む */
+  score: 0 | 2 | 4 | 5
 }
 
 export interface Question {
@@ -25,11 +29,13 @@ export interface ResultType {
   id: string
   name: string
   emoji: string
-  /** 占い風の一言 */
+  /** SVGアイコンの内側パス(stroke 描画) */
+  icon: string
+  /** 占い風の一言(キャッチコピー) */
   catchphrase: string
   /** 真面目な傾向解説 */
   description: string
-  /** 暮らしへの活かし方の一言 */
+  /** 暮らしへの活かし方の一言(One Point) */
   advice: string
 }
 
@@ -54,8 +60,10 @@ export interface DiagnosisResult {
   total: number
   /** 各領域 0〜25 */
   domainScores: Record<Domain, number>
-  /** 突出領域。偏りが閾値未満なら null */
-  dominantDomain: Domain | null
+  /** 最もスコアの高い領域(結果画面のハイライト用。常に存在) */
+  maxDomain: Domain
+  /** 領域スコアの最大-最小(偏りの大きさ。タイプ判定に使用) */
+  spread: number
   type: ResultType
   /** 全体スコア帯ごとの一言(味付けコメント) */
   scoreBandComment: string

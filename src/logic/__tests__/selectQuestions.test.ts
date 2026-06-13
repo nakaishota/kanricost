@@ -48,8 +48,8 @@ describe('selectQuestions', () => {
         scenario: 'dummy',
         choices: [
           { text: 'a', score: 0 },
-          { text: 'b', score: 1 },
-          { text: 'c', score: 3 },
+          { text: 'b', score: 2 },
+          { text: 'c', score: 4 },
           { text: 'd', score: 5 },
         ],
       },

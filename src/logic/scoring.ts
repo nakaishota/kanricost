@@ -13,13 +13,12 @@ import {
   scoreBandComment,
 } from '../data/insights'
 
-/** 突出領域とみなす偏り(他3領域平均との差)の閾値 */
-export const DOMINANT_THRESHOLD = 5
-
 /** 全体スコア帯の境界(この値以上で次の帯) */
-export const SCORE_BAND_HODOHODO = 30
-export const SCORE_BAND_MID = 55
-export const SCORE_BAND_GACHI = 80
+export const SCORE_BAND_HODOHODO = 40
+export const SCORE_BAND_MID = 65
+export const SCORE_BAND_GACHI = 85
+/** 中スコア帯で「隠れ管理嫌い型」とみなす領域スコアの偏り(最大-最小)の閾値 */
+export const SPREAD_THRESHOLD = 9
 
 /** 領域別スコアを集計する(回答が無い領域は 0) */
 export function aggregateDomainScores(
@@ -32,29 +31,21 @@ export function aggregateDomainScores(
 }
 
 /**
- * 突出領域を判定する。
- * deviation(d) = 領域スコア − 他3領域の平均。
- * 最大 deviation が DOMINANT_THRESHOLD 以上なら突出、未満なら null。
+ * 最もスコアの高い領域を返す(結果ハイライト・領域別タイプ判定に使用)。
  * 同点は domainIds の定義順で先勝ち(決定的)。
  */
-export function findDominantDomain(
-  domainScores: Record<Domain, number>,
-): Domain | null {
-  let best: Domain | null = null
-  let bestDeviation = -Infinity
-
+export function findMaxDomain(domainScores: Record<Domain, number>): Domain {
+  let best = domainIds[0]
   for (const id of domainIds) {
-    const others = domainIds.filter((d) => d !== id)
-    const othersAvg =
-      others.reduce((sum, d) => sum + domainScores[d], 0) / others.length
-    const deviation = domainScores[id] - othersAvg
-    if (deviation > bestDeviation) {
-      bestDeviation = deviation
-      best = id
-    }
+    if (domainScores[id] > domainScores[best]) best = id
   }
+  return best
+}
 
-  return bestDeviation >= DOMINANT_THRESHOLD ? best : null
+/** 領域スコアの偏り(最大 - 最小) */
+export function scoreSpread(domainScores: Record<Domain, number>): number {
+  const vals = domainIds.map((id) => domainScores[id])
+  return Math.max(...vals) - Math.min(...vals)
 }
 
 const MID_DOMAIN_TYPE: Record<Domain, string> = {
@@ -65,24 +56,25 @@ const MID_DOMAIN_TYPE: Record<Domain, string> = {
 }
 
 /**
- * 全体スコア帯 × 突出領域 からタイプを決定する純関数。
- *   80〜100        → ガチミニマリスト型
- *   55〜79 × 突出  → 領域別タイプ
- *   55〜79 × なし  → 隠れ管理嫌い型
- *   30〜54        → ほどほど管理型
- *    0〜29        → 管理大好きコレクター型
+ * 全体スコア帯 × 領域の偏りからタイプを決定する純関数。
+ *   85〜100        → ガチミニマリスト型
+ *   65〜84 × 最大領域 → 領域別タイプ
+ *   40〜64 × 偏り大   → 隠れ管理嫌い型
+ *   40〜64 × 偏り小   → ほどほど管理型
+ *    0〜39        → 管理大好きコレクター型
  */
 export function judgeType(
   total: number,
-  dominantDomain: Domain | null,
+  maxDomain: Domain,
+  spread: number,
 ): ResultType {
   if (total >= SCORE_BAND_GACHI) return resultTypeById('gachi-minimalist')
-  if (total >= SCORE_BAND_MID) {
+  if (total >= SCORE_BAND_MID) return resultTypeById(MID_DOMAIN_TYPE[maxDomain])
+  if (total >= SCORE_BAND_HODOHODO) {
     return resultTypeById(
-      dominantDomain ? MID_DOMAIN_TYPE[dominantDomain] : 'kakure-kanri-girai',
+      spread >= SPREAD_THRESHOLD ? 'kakure-kanri-girai' : 'hodohodo',
     )
   }
-  if (total >= SCORE_BAND_HODOHODO) return resultTypeById('hodohodo')
   return resultTypeById('collector')
 }
 
@@ -101,12 +93,14 @@ export function buildDomainComments(
 export function diagnose(answers: AnswerRecord[]): DiagnosisResult {
   const domainScores = aggregateDomainScores(answers)
   const total = answers.reduce((sum, a) => sum + a.score, 0)
-  const dominantDomain = findDominantDomain(domainScores)
-  const type = judgeType(total, dominantDomain)
+  const maxDomain = findMaxDomain(domainScores)
+  const spread = scoreSpread(domainScores)
+  const type = judgeType(total, maxDomain, spread)
   return {
     total,
     domainScores,
-    dominantDomain,
+    maxDomain,
+    spread,
     type,
     scoreBandComment: scoreBandComment(total),
     domainComments: buildDomainComments(domainScores),
