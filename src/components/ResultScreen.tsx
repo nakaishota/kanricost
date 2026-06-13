@@ -108,17 +108,6 @@ export function ResultScreen({
       >
         {/* スクショ用サマリーカード */}
         <ShareCard result={result} countDelay={COUNT_DELAY} />
-        <div
-          style={{
-            marginTop: 14,
-            textAlign: 'center',
-            fontSize: 11.5,
-            letterSpacing: '.02em',
-            color: 'var(--faint)',
-          }}
-        >
-          ↑ このカードをスクショしてシェアできます
-        </div>
 
         <DomainBalance result={result} />
 
