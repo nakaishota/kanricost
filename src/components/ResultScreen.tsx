@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { DiagnosisResult } from '../types'
-import { Icon } from './Icon'
-import { ScoreGauge } from './ScoreGauge'
+import { ShareCard } from './ShareCard'
 import { DomainBalance } from './DomainBalance'
 import { buildShareText, buildXIntentUrl, copyText } from '../logic/share'
 
@@ -107,90 +106,19 @@ export function ResultScreen({
           animation: 'kc-reveal 1s ease 2.15s both',
         }}
       >
-        {/* タイプカード */}
+        {/* スクショ用サマリーカード */}
+        <ShareCard result={result} countDelay={COUNT_DELAY} />
         <div
           style={{
-            position: 'relative',
-            borderRadius: 16,
-            background: 'var(--ink)',
-            color: 'var(--white)',
-            padding: '38px 28px',
-            overflow: 'hidden',
-            boxShadow: 'var(--card-shadow)',
+            marginTop: 14,
+            textAlign: 'center',
+            fontSize: 11.5,
+            letterSpacing: '.02em',
+            color: 'var(--faint)',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: '-40%',
-              right: '-25%',
-              width: '90%',
-              height: '110%',
-              background:
-                'radial-gradient(50% 50% at 70% 30%, rgba(99,102,241,.55), transparent 72%), radial-gradient(46% 48% at 30% 70%, rgba(45,212,191,.4), transparent 72%), radial-gradient(40% 44% at 80% 80%, rgba(245,158,11,.3), transparent 72%)',
-              filter: 'blur(34px)',
-              opacity: 0.65,
-              pointerEvents: 'none',
-            }}
-          />
-          <div
-            style={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 10.5,
-                letterSpacing: '.26em',
-                textTransform: 'uppercase',
-                color: '#9a9a9a',
-              }}
-            >
-              Your Type
-            </div>
-            <div
-              style={{
-                marginTop: 24,
-                height: 64,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--white)',
-              }}
-            >
-              <Icon inner={type.icon} size={64} strokeWidth={1.25} />
-            </div>
-            <h2
-              style={{
-                fontSize: 26,
-                fontWeight: 600,
-                letterSpacing: '-.01em',
-                margin: '16px 0 0',
-                color: 'var(--white)',
-                lineBreak: 'strict',
-                textWrap: 'balance',
-              }}
-            >
-              {type.name}
-            </h2>
-            <p
-              style={{
-                fontSize: 14,
-                lineHeight: 1.95,
-                color: '#bdbdbd',
-                margin: '14px 0 0',
-              }}
-            >
-              「{type.catchphrase}」
-            </p>
-          </div>
+          ↑ このカードをスクショしてシェアできます
         </div>
-
-        <ScoreGauge total={result.total} countDelay={COUNT_DELAY} />
 
         <DomainBalance result={result} />
 
