@@ -1,7 +1,8 @@
 import type { DiagnosisResult } from '../types'
+import { SITE_URL } from '../constants'
 
-/** SNSシェア・コピー用のテキストを組み立てる */
-export function buildShareText(result: DiagnosisResult): string {
+/** 結果の本文(タイプ・スコア・キャッチ・ハッシュタグ)。URLは含めない */
+function shareBody(result: DiagnosisResult): string {
   const { type, total } = result
   return (
     `【管理コスト診断】わたしは ${type.emoji} ${type.name} でした。\n` +
@@ -11,12 +12,18 @@ export function buildShareText(result: DiagnosisResult): string {
   )
 }
 
-/** X(Twitter)のインテントURL */
+/** コピー用テキスト。末尾に診断サイトのURLを添付する */
+export function buildShareText(result: DiagnosisResult): string {
+  return `${shareBody(result)}\n\n▼あなたもやってみる\n${SITE_URL}`
+}
+
+/** X(Twitter)のインテントURL。本文は text、サイトURLは url パラメータに分けて添付 */
 export function buildXIntentUrl(result: DiagnosisResult): string {
-  return (
-    'https://twitter.com/intent/tweet?text=' +
-    encodeURIComponent(buildShareText(result))
-  )
+  const params = new URLSearchParams({
+    text: shareBody(result),
+    url: SITE_URL,
+  })
+  return `https://twitter.com/intent/tweet?${params.toString()}`
 }
 
 /** クリップボードへコピー(失敗時は textarea フォールバック) */

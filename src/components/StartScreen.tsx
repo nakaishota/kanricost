@@ -1,4 +1,5 @@
 import { TOTAL_QUESTIONS } from '../data/domains'
+import { PortfolioLink } from './PortfolioLink'
 
 export function StartScreen({ onStart }: { onStart: () => void }) {
   return (
@@ -125,6 +126,19 @@ export function StartScreen({ onStart }: { onStart: () => void }) {
             <span style={{ fontSize: 14 }}>→</span>
           </button>
         </div>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 26,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <PortfolioLink />
       </div>
     </div>
   )

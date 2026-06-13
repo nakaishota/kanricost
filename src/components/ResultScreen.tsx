@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { DiagnosisResult } from '../types'
 import { ShareCard } from './ShareCard'
 import { DomainBalance } from './DomainBalance'
+import { PortfolioLink } from './PortfolioLink'
 import { buildShareText, buildXIntentUrl, copyText } from '../logic/share'
 
 const COUNT_DELAY = 2550 // カーテンが明けてからカウント開始
@@ -245,6 +246,17 @@ export function ResultScreen({
           }}
         >
           ※ 問題は毎回ランダムに入れ替わります
+        </div>
+        <div
+          style={{
+            marginTop: 24,
+            paddingTop: 20,
+            borderTop: '1px solid var(--line)',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <PortfolioLink />
         </div>
       </div>
     </div>
