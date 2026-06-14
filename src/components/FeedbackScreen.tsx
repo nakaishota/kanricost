@@ -15,6 +15,7 @@ const THUMB_DOWN =
 
 const GOOD_COLOR = '#1f9d55'
 const BAD_COLOR = '#d14343'
+const ABCD = ['A', 'B', 'C', 'D']
 
 /**
  * そのセッションで出題した20問を縦リストで表示し、各問を 👍/👎 で評価して
@@ -36,6 +37,7 @@ export function FeedbackScreen({
   onDone: () => void
 }) {
   const [ratings, setRatings] = useState<Record<string, Rating | undefined>>({})
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [phase, setPhase] = useState<'rating' | 'sending' | 'sent'>('rating')
 
   const answerByQ = useMemo(
@@ -50,6 +52,10 @@ export function FeedbackScreen({
       ...prev,
       [id]: prev[id] === value ? undefined : value,
     }))
+  }
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
   const submit = async () => {
@@ -189,6 +195,7 @@ export function FeedbackScreen({
             ? q.choices.find((c) => c.score === a.score)
             : undefined
           const rating = ratings[q.id]
+          const isOpen = !!expanded[q.id]
           return (
             <div
               key={q.id}
@@ -243,7 +250,7 @@ export function FeedbackScreen({
               >
                 {q.scenario}
               </p>
-              {choice && (
+              {!isOpen && choice && (
                 <p
                   style={{
                     margin: '5px 0 0',
@@ -255,8 +262,82 @@ export function FeedbackScreen({
                   → {choice.text}
                 </p>
               )}
+              {isOpen && (
+                <div
+                  style={{
+                    marginTop: 9,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                  }}
+                >
+                  {q.choices.map((c, ci) => {
+                    const picked = !!a && c.score === a.score
+                    return (
+                      <div
+                        key={ci}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 9,
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: `1px solid ${picked ? 'var(--ink)' : 'var(--line)'}`,
+                          background: picked ? '#f5f5f5' : 'var(--white)',
+                        }}
+                      >
+                        <span
+                          style={{
+                            flex: 'none',
+                            width: 18,
+                            height: 18,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: `1px solid ${picked ? 'var(--ink)' : 'var(--line)'}`,
+                            borderRadius: 5,
+                            fontSize: 10,
+                            color: picked ? 'var(--ink)' : 'var(--faint)',
+                          }}
+                        >
+                          {ABCD[ci]}
+                        </span>
+                        <span
+                          style={{
+                            flex: 1,
+                            fontSize: 12.5,
+                            lineHeight: 1.5,
+                            color: 'var(--ink)',
+                          }}
+                        >
+                          {c.text}
+                        </span>
+                        {picked && (
+                          <span
+                            style={{
+                              flex: 'none',
+                              fontSize: 10.5,
+                              color: 'var(--muted)',
+                              alignSelf: 'center',
+                            }}
+                          >
+                            あなたの回答
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 12,
+                }}
+              >
                 <RateButton
                   inner={THUMB_UP}
                   active={rating === 'good'}
@@ -269,6 +350,22 @@ export function FeedbackScreen({
                   activeColor={BAD_COLOR}
                   onClick={() => toggle(q.id, 'bad')}
                 />
+                <button
+                  onClick={() => toggleExpand(q.id)}
+                  style={{
+                    marginLeft: 'auto',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--muted)',
+                    fontSize: 12,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  {isOpen ? '選択肢を閉じる' : '選択肢を見る'}
+                  <span style={{ fontSize: 9 }}>{isOpen ? '▲' : '▼'}</span>
+                </button>
               </div>
             </div>
           )
