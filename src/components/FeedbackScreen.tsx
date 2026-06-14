@@ -8,9 +8,17 @@ import {
   type Rating,
 } from '../logic/feedback'
 
+const THUMB_UP =
+  '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>'
+const THUMB_DOWN =
+  '<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>'
+
+const GOOD_COLOR = '#1f9d55'
+const BAD_COLOR = '#d14343'
+
 /**
  * そのセッションで出題した20問を縦リストで表示し、各問を 👍/👎 で評価して
- * GAS へ送信する。AIが生成した問題・回答の品質を見極めるためのフィードバック収集。
+ * GAS へ送信する。問題・回答の品質を見極めるためのフィードバック収集。
  */
 export function FeedbackScreen({
   questions,
@@ -98,9 +106,9 @@ export function FeedbackScreen({
             maxWidth: 320,
           }}
         >
-          いただいた評価は、問題と回答の精度を見直して
+          いただいた評価は、問題と回答の品質を
           <br />
-          品質を高めるために役立てます。
+          高めるために役立てます。
         </p>
         <button
           onClick={onDone}
@@ -163,7 +171,7 @@ export function FeedbackScreen({
           margin: '10px 0 0',
         }}
       >
-        出題された20問の「問題と選択肢の出来」を👍/👎で教えてください。AIが作問しているため、精度を見直す手がかりにします。気になった問題だけでも大丈夫です。
+        出題された20問について、問題と選択肢の良し悪しを教えてください。気になった問題だけでも大丈夫です。
       </p>
 
       <div
@@ -185,85 +193,80 @@ export function FeedbackScreen({
             <div
               key={q.id}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
                 border: '1px solid var(--line)',
                 borderRadius: 12,
                 background: 'var(--white)',
-                padding: '14px 14px 14px 16px',
+                padding: '14px 16px 16px',
                 boxShadow: '0 1px 1px #00000008',
               }}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  marginBottom: 7,
+                }}
+              >
+                <span
+                  className="tnum"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    marginBottom: 6,
+                    fontSize: 10,
+                    color: 'var(--faint)',
+                    letterSpacing: '.04em',
                   }}
                 >
-                  <span
-                    className="tnum"
-                    style={{
-                      fontSize: 10,
-                      color: 'var(--faint)',
-                      letterSpacing: '.04em',
-                    }}
-                  >
-                    Q{String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{ display: 'flex', color: 'var(--muted)' }}>
-                    <Icon inner={dom.icon} size={13} />
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 9.5,
-                      letterSpacing: '.08em',
-                      textTransform: 'uppercase',
-                      color: 'var(--faint)',
-                    }}
-                  >
-                    {dom.code}
-                  </span>
-                </div>
+                  Q{String(i + 1).padStart(2, '0')}
+                </span>
+                <span style={{ display: 'flex', color: 'var(--muted)' }}>
+                  <Icon inner={dom.icon} size={13} />
+                </span>
+                <span
+                  style={{
+                    fontSize: 9.5,
+                    letterSpacing: '.08em',
+                    textTransform: 'uppercase',
+                    color: 'var(--faint)',
+                  }}
+                >
+                  {dom.code}
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: 'var(--ink)',
+                  textWrap: 'pretty',
+                }}
+              >
+                {q.scenario}
+              </p>
+              {choice && (
                 <p
                   style={{
-                    margin: 0,
-                    fontSize: 13.5,
-                    lineHeight: 1.6,
-                    color: 'var(--ink)',
-                    textWrap: 'pretty',
+                    margin: '5px 0 0',
+                    fontSize: 12,
+                    lineHeight: 1.5,
+                    color: 'var(--muted)',
                   }}
                 >
-                  {q.scenario}
+                  → {choice.text}
                 </p>
-                {choice && (
-                  <p
-                    style={{
-                      margin: '6px 0 0',
-                      fontSize: 12,
-                      lineHeight: 1.55,
-                      color: 'var(--muted)',
-                    }}
-                  >
-                    あなたの回答: {choice.text}
-                  </p>
-                )}
-              </div>
+              )}
 
-              <div style={{ display: 'flex', gap: 6, flex: 'none' }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                 <RateButton
-                  emoji="👍"
+                  inner={THUMB_UP}
                   active={rating === 'good'}
-                  activeColor="#1f9d55"
+                  activeColor={GOOD_COLOR}
                   onClick={() => toggle(q.id, 'good')}
                 />
                 <RateButton
-                  emoji="👎"
+                  inner={THUMB_DOWN}
                   active={rating === 'bad'}
-                  activeColor="#d14343"
+                  activeColor={BAD_COLOR}
                   onClick={() => toggle(q.id, 'bad')}
                 />
               </div>
@@ -279,8 +282,7 @@ export function FeedbackScreen({
           marginTop: 22,
           paddingTop: 16,
           paddingBottom: 4,
-          background:
-            'linear-gradient(to top, var(--bg) 70%, transparent)',
+          background: 'linear-gradient(to top, var(--bg) 70%, transparent)',
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
@@ -326,12 +328,12 @@ export function FeedbackScreen({
 }
 
 function RateButton({
-  emoji,
+  inner,
   active,
   activeColor,
   onClick,
 }: {
-  emoji: string
+  inner: string
   active: boolean
   activeColor: string
   onClick: () => void
@@ -341,21 +343,19 @@ function RateButton({
       onClick={onClick}
       aria-pressed={active}
       style={{
-        width: 44,
-        height: 44,
+        width: 62,
+        height: 38,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 20,
-        lineHeight: 1,
-        borderRadius: 11,
+        borderRadius: 10,
         border: `1.5px solid ${active ? activeColor : 'var(--line)'}`,
         background: active ? `${activeColor}14` : 'var(--white)',
-        filter: active ? 'none' : 'grayscale(0.4) opacity(0.75)',
-        transition: 'border-color .15s ease, background .15s ease, filter .15s ease',
+        color: active ? activeColor : 'var(--faint)',
+        transition: 'border-color .15s ease, background .15s ease, color .15s ease',
       }}
     >
-      {emoji}
+      <Icon inner={inner} size={18} strokeWidth={1.7} />
     </button>
   )
 }

@@ -283,7 +283,7 @@ export function ResultScreen({
               margin: '8px 0 0',
             }}
           >
-            この診断はAIが作問しています。出題された20問の出来を👍/👎で教えてください。
+            出題された20問について、問題と選択肢の良し悪しを教えてください。
           </p>
           <button
             onClick={onFeedback}
