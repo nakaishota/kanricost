@@ -78,13 +78,19 @@ function AnalyzingCurtain() {
 
 export function ResultScreen({
   result,
+  skipIntro = false,
   onRestart,
+  onFeedback,
 }: {
   result: DiagnosisResult
+  /** 結果発表のカーテン演出をスキップ(フィードバックから戻ったとき) */
+  skipIntro?: boolean
   onRestart: () => void
+  onFeedback: () => void
 }) {
   const [copied, setCopied] = useState(false)
   const { type } = result
+  const countDelay = skipIntro ? 200 : COUNT_DELAY
 
   const shareX = () => {
     window.open(buildXIntentUrl(result), '_blank')
@@ -97,18 +103,18 @@ export function ResultScreen({
 
   return (
     <div data-screen="result">
-      <AnalyzingCurtain />
+      {!skipIntro && <AnalyzingCurtain />}
 
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           padding: '28px 24px 56px',
-          animation: 'kc-reveal 1s ease 2.15s both',
+          animation: skipIntro ? undefined : 'kc-reveal 1s ease 2.15s both',
         }}
       >
         {/* スクショ用サマリーカード */}
-        <ShareCard result={result} countDelay={COUNT_DELAY} />
+        <ShareCard result={result} countDelay={countDelay} />
 
         <DomainBalance result={result} />
 
@@ -246,6 +252,55 @@ export function ResultScreen({
           }}
         >
           ※ 問題は毎回ランダムに入れ替わります
+        </div>
+
+        {/* 問題フィードバックの導線 */}
+        <div
+          style={{
+            marginTop: 28,
+            border: '1px solid var(--line)',
+            borderRadius: 14,
+            background: 'var(--white)',
+            padding: '20px 20px 22px',
+            textAlign: 'center',
+            boxShadow: '0 1px 1px #00000008',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13.5,
+              fontWeight: 600,
+              color: 'var(--ink)',
+            }}
+          >
+            問題の品質向上にご協力ください
+          </div>
+          <p
+            style={{
+              fontSize: 12,
+              lineHeight: 1.75,
+              color: 'var(--sub)',
+              margin: '8px 0 0',
+            }}
+          >
+            この診断はAIが作問しています。出題された20問の出来を👍/👎で教えてください。
+          </p>
+          <button
+            onClick={onFeedback}
+            style={{
+              marginTop: 16,
+              height: 44,
+              padding: '0 24px',
+              background: 'var(--ink)',
+              color: 'var(--white)',
+              border: 'none',
+              borderRadius: 100,
+              fontSize: 13.5,
+              fontWeight: 500,
+            }}
+          >
+            問題フィードバックにご協力ください
+          </button>
         </div>
         <div
           style={{
