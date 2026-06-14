@@ -133,12 +133,23 @@ export function StartScreen({ onStart }: { onStart: () => void }) {
           position: 'absolute',
           left: 0,
           right: 0,
-          bottom: 26,
+          bottom: 20,
           display: 'flex',
-          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 8,
         }}
       >
         <PortfolioLink />
+        <span
+          style={{
+            fontSize: 10,
+            letterSpacing: '.08em',
+            color: 'var(--faint)',
+          }}
+        >
+          {__APP_VERSION__}
+        </span>
       </div>
     </div>
   )

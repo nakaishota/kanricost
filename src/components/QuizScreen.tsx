@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AnswerRecord, Question } from '../types'
 import { domainInfo, TOTAL_QUESTIONS } from '../data/domains'
+import { setBreadcrumb } from '../logic/errorLog'
 import { Icon } from './Icon'
 
 /**
@@ -30,6 +31,15 @@ export function QuizScreen({
       for (const t of timers) clearTimeout(t)
     }
   }, [])
+
+  // エラー収集用に「今どの設問にいるか」を記録(発生時に何問目かが残る)
+  useEffect(() => {
+    setBreadcrumb({
+      screen: 'quiz',
+      questionIndex: idx,
+      questionId: questions[idx]?.id,
+    })
+  }, [idx, questions])
 
   const later = (fn: () => void, ms: number) => {
     timersRef.current.push(window.setTimeout(fn, ms))
