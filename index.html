@@ -4,23 +4,64 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fafafa" />
+
     <title>管理コスト診断 | あなたのミニマリスト度を占う</title>
     <meta
       name="description"
-      content="モノ・デジタル・人間関係・お金。日常の選択から「管理コスト」をどれだけ嫌うかを診断し、あなたのミニマリスト度を占います。全20問・約3分。"
+      content="モノ・デジタル・人間関係・お金。日常の選択から「管理コスト」をどれだけ嫌うかを診断し、あなたのミニマリスト度を占います。全20問・約3分・無料。"
     />
-    <meta property="og:title" content="管理コスト診断" />
+    <link rel="canonical" href="https://nakaishota.github.io/kanricost/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="管理コスト診断 | あなたのミニマリスト度を占う" />
     <meta
       property="og:description"
-      content="日常の選択から、あなたが「管理コスト」をどれだけ嫌うかを診断。ミニマリスト度を占います。全20問・約3分。"
+      content="日常の選択から、あなたが「管理コスト」をどれだけ嫌うかを診断。ミニマリスト度を占います。全20問・約3分・無料。"
     />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="管理コスト診断" />
+    <meta property="og:url" content="https://nakaishota.github.io/kanricost/" />
+    <meta property="og:site_name" content="管理コスト診断" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:image" content="https://nakaishota.github.io/kanricost/ogp.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="管理コスト診断 — あなたのミニマリスト度を占う" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="管理コスト診断 | あなたのミニマリスト度を占う" />
     <meta
       name="twitter:description"
-      content="日常の選択から、あなたが「管理コスト」をどれだけ嫌うかを診断。ミニマリスト度を占います。全20問・約3分。"
+      content="日常の選択から、あなたが「管理コスト」をどれだけ嫌うかを診断。ミニマリスト度を占います。全20問・約3分・無料。"
     />
+    <meta name="twitter:image" content="https://nakaishota.github.io/kanricost/ogp.png" />
+
+    <!-- 構造化データ -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "管理コスト診断",
+        "url": "https://nakaishota.github.io/kanricost/",
+        "description": "モノ・デジタル・人間関係・お金。日常の選択から「管理コスト」をどれだけ嫌うかを診断し、あなたのミニマリスト度を占う無料の Web 診断。全20問・約3分。",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "ja",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "JPY"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "shota nakai",
+          "url": "https://nakaicode.com"
+        }
+      }
+    </script>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-21CG6J7C0N"></script>
     <script>
@@ -31,7 +72,27 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- JS 無効環境・クローラー向けのフォールバック。React マウント時に置き換わる。 -->
+      <noscript>
+        <main style="max-width: 640px; margin: 0 auto; padding: 48px 24px; font-family: system-ui, sans-serif; line-height: 1.9;">
+          <h1>管理コスト診断 — あなたのミニマリスト度を占う</h1>
+          <p>
+            モノ・通知・予定・契約。暮らしにひそむ「維持する手間(管理コスト)」への態度を、
+            日常のシナリオから診断します。全20問・約3分・無料。
+          </p>
+          <h2>診断する4つの領域</h2>
+          <ul>
+            <li>モノの管理(持ち物・置き場所・手入れ)</li>
+            <li>デジタルの管理(通知・未読・アカウント)</li>
+            <li>人間関係・予定の管理(約束・カレンダー)</li>
+            <li>お金・契約の管理(サブスク・固定費)</li>
+          </ul>
+          <p>結果は8タイプ(ガチミニマリスト型・手ぶら主義型・通知ゼロ型・予定白紙型・固定費アレルギー型 ほか)に分類して表示します。</p>
+          <p>診断を始めるには JavaScript を有効にしてください。</p>
+        </main>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
